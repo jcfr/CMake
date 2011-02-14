@@ -184,6 +184,8 @@ SET(SRCS
   cmGeneratorExpression.h
   cmGlobalGenerator.cxx
   cmGlobalGenerator.h
+  cmGlobalNinjaGenerator.cxx
+  cmGlobalNinjaGenerator.h
   cmGlobalUnixMakefileGenerator3.cxx
   cmGlobalUnixMakefileGenerator3.h
   cmGraphAdjacencyList.h
@@ -205,6 +207,7 @@ SET(SRCS
   cmListFileLexer.c
   cmLocalGenerator.cxx
   cmLocalGenerator.h
+  cmLocalNinjaGenerator.cxx
   cmLocalUnixMakefileGenerator3.cxx
   cmMakeDepend.cxx
   cmMakeDepend.h
@@ -214,6 +217,10 @@ SET(SRCS
   cmMakefileExecutableTargetGenerator.cxx
   cmMakefileLibraryTargetGenerator.cxx
   cmMakefileUtilityTargetGenerator.cxx
+  cmNinjaTargetGenerator.cxx
+  cmNinjaExecutableTargetGenerator.cxx
+  cmNinjaLibraryTargetGenerator.cxx
+  cmNinjaUtilityTargetGenerator.cxx
   cmOrderDirectories.cxx
   cmOrderDirectories.h
   cmPolicies.h
