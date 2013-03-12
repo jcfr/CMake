@@ -156,7 +156,7 @@
 #  License text for the above reference.)
 
 function(ExternalData_add_test target)
-  ExternalData_expand_arguments("${target}" testArgs ${ARGN})
+  ExternalData_expand_arguments("${target}" testArgs "${ARGN}")
   add_test(${testArgs})
 endfunction()
 
