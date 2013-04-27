@@ -423,6 +423,13 @@ function(set_bundle_key_values keys_var context item exepath dirs copyflag)
     gp_resolve_embedded_item("${context}" "${embedded_item}" "${exepath}" resolved_embedded_item)
     get_filename_component(resolved_embedded_item "${resolved_embedded_item}" ABSOLUTE)
 
+    # Do not copy already embedded item
+    set(verbose 0)
+    is_resolved_item_embedded("${resolved_embedded_item}" "${exepath}" "${verbose}" is_embedded)
+    if(EXISTS "${resolved_embedded_item}" AND is_embedded)
+      set(copyflag 0)
+      set(resolved_item "${resolved_embedded_item}")
+    endif()
 
     set(${keys_var} ${${keys_var}} PARENT_SCOPE)
     set(${key}_ITEM "${item}" PARENT_SCOPE)
