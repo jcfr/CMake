@@ -16,6 +16,7 @@
 #   get_bundle_keys
 #   copy_resolved_item_into_bundle
 #   copy_resolved_framework_into_bundle
+#   is_resolved_item_embedded
 #   fixup_bundle_item
 #   verify_bundle_prerequisites
 #   verify_bundle_symlinks
@@ -109,6 +110,13 @@
 # ON before calling fixup_bundle. By default,
 # COPY_RESOLVED_FRAMEWORK_INTO_BUNDLE copies the framework dylib itself plus
 # the framework Resources directory.
+#
+#  IS_RESOLVED_ITEM_EMBEDDED(<resolved_item> <exepath> <verbose> <is_embedded_var>)
+# Set variable <is_embedded_var> to True if the resolved item is
+# embedded into the bundle. The function does NOT check for the existence of the
+# item, instead if checks if the provided path would correspond to an embeddable
+# item. If <verbose> is True, extra information will be displayed in case the item
+# is not embedded.
 #
 #  FIXUP_BUNDLE_ITEM(<resolved_embedded_item> <exepath> <dirs>)
 # Get the direct/non-system prerequisites of the resolved embedded item. For
@@ -555,6 +563,29 @@ function(copy_resolved_framework_into_bundle resolved_item resolved_embedded_ite
 
 endfunction()
 
+function(is_resolved_item_embedded resolved_item exepath verbose is_embedded_var)
+  get_dotapp_dir("${exepath}" exe_dotapp_dir)
+  string(LENGTH "${exe_dotapp_dir}/" exe_dotapp_dir_length)
+  string(LENGTH "${resolved_item}" resolved_item_length)
+  set(path_too_short 0)
+  set(is_embedded 0)
+  if(${resolved_item_length} LESS ${exe_dotapp_dir_length})
+    set(path_too_short 1)
+  endif()
+  if(NOT path_too_short)
+    string(SUBSTRING "${resolved_item}" 0 ${exe_dotapp_dir_length} item_substring)
+    if("${exe_dotapp_dir}/" STREQUAL "${item_substring}")
+      set(is_embedded 1)
+    endif()
+  endif()
+  if(verbose AND NOT is_embedded)
+    message("  exe_dotapp_dir/='${exe_dotapp_dir}/'")
+    message("  item_substring='${item_substring}'")
+    message("  resolved_item='${resolved_item}'")
+    message("")
+  endif()
+  set(${is_embedded_var} ${is_embedded} PARENT_SCOPE)
+endfunction()
 
 function(fixup_bundle_item resolved_embedded_item exepath dirs)
   # This item's key is "ikey":
@@ -566,25 +597,9 @@ function(fixup_bundle_item resolved_embedded_item exepath dirs)
   # tree, or in other varied locations around the file system, with our call to
   # install_name_tool. Make sure that doesn't happen here:
   #
-  get_dotapp_dir("${exepath}" exe_dotapp_dir)
-  string(LENGTH "${exe_dotapp_dir}/" exe_dotapp_dir_length)
-  string(LENGTH "${resolved_embedded_item}" resolved_embedded_item_length)
-  set(path_too_short 0)
-  set(is_embedded 0)
-  if(${resolved_embedded_item_length} LESS ${exe_dotapp_dir_length})
-    set(path_too_short 1)
-  endif()
-  if(NOT path_too_short)
-    string(SUBSTRING "${resolved_embedded_item}" 0 ${exe_dotapp_dir_length} item_substring)
-    if("${exe_dotapp_dir}/" STREQUAL "${item_substring}")
-      set(is_embedded 1)
-    endif()
-  endif()
+  set(verbose 1)
+  is_resolved_item_embedded("${resolved_embedded_item}" "${exepath}" "${verbose}" is_embedded)
   if(NOT is_embedded)
-    message("  exe_dotapp_dir/='${exe_dotapp_dir}/'")
-    message("  item_substring='${item_substring}'")
-    message("  resolved_embedded_item='${resolved_embedded_item}'")
-    message("")
     message("Install or copy the item into the bundle before calling fixup_bundle.")
     message("Or maybe there's a typo or incorrect path in one of the args to fixup_bundle?")
     message("")
