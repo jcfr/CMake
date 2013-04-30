@@ -18,6 +18,8 @@
 #     (projects can override with gp_item_default_embedded_path_override)
 #   gp_resolve_item
 #     (projects can override with gp_resolve_item_override)
+#   gp_resolve_embedded_item
+#     (projects can override with gp_resolve_embedded_item_override)
 #   gp_resolved_file_type
 #     (projects can override with gp_resolved_file_type_override)
 #   gp_file_type
@@ -81,6 +83,19 @@
 #
 # Override on a per-project basis by providing a project-specific
 # gp_resolve_item_override function.
+#
+#  GP_RESOLVE_EMBEDDED_ITEM(<context> <embedded_item> <exepath> <resolved_embedded_item_var>)
+# Resolve an embedded item into the full path within the full path. Since the item can be
+# copied later, it doesn't have to exist when calling this function.
+#
+# Override on a per-project basis by providing a project-specific
+# gp_resolve_embedded_item_override function.
+#
+# If GP_RPATH_DIR variable is set then item matching '@rpath' are
+# resolved using the provided directory. Currently setting this variable
+# has an effect only on MacOSX when fixing up application bundle. The directory
+# are also assumed to be located within the application bundle. It is
+# usually the directory passed to the 'rpath' linker option.
 #
 #  GP_RESOLVED_FILE_TYPE(<original_file> <file> <exepath> <dirs> <type_var>)
 # Return the type of <file> with respect to <original_file>. String
@@ -317,14 +332,29 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
     if(item MATCHES "@rpath")
       #
       # @rpath references are relative to the paths built into the binaries with -rpath
-      # We handle this case like we do for other Unixes
+      # We handle this case like we do for other Unixes.
+      #
+      # Two cases of item resolution are considered:
+      #
+      #  (1) item has been copied into the bundle
+      #
+      #  (2) item has NOT been copied into the bundle: Since the item can exist in a build or
+      #      install tree outside of the bundle, the item is resolved using its name and the
+      #      passed list of directories.
       #
       string(REPLACE "@rpath/" "" norpath_item "${item}")
 
       set(ri "ri-NOTFOUND")
-      find_file(ri "${norpath_item}" ${exepath} ${dirs} NO_DEFAULT_PATH)
+      if(EXISTS ${GP_RPATH_DIR}/${norpath_item})
+        set(ri ${GP_RPATH_DIR}/${norpath_item})
+        set(_msg "'find_file' in GP_RPATH_DIR (${ri})")
+      else()
+        get_filename_component(norpath_item_name ${norpath_item} NAME)
+        find_file(ri "${norpath_item_name}" ${exepath} ${dirs} NO_DEFAULT_PATH)
+        set(_msg "'find_file' in exepath/dirs (${ri})")
+      endif()
       if(ri)
-        #message(STATUS "info: 'find_file' in exepath/dirs (${ri})")
+        #message(STATUS "info: ${_msg}")
         set(resolved 1)
         set(resolved_item "${ri}")
         set(ri "ri-NOTFOUND")
@@ -416,6 +446,46 @@ warning: cannot resolve item '${item}'
   set(${resolved_item_var} "${resolved_item}" PARENT_SCOPE)
 endfunction()
 
+function(gp_resolve_embedded_item context embedded_item exepath resolved_embedded_item_var)
+  #message(STATUS "**")
+  set(resolved 0)
+  set(resolved_embedded_item "${embedded_item}")
+
+  if(embedded_item MATCHES "@executable_path")
+    string(REPLACE "@executable_path" "${exepath}" resolved_embedded_item "${embedded_item}")
+    set(resolved 1)
+  endif()
+  if(EXISTS "${GP_RPATH_DIR}" AND embedded_item MATCHES "@rpath")
+    string(REPLACE "@rpath" "${GP_RPATH_DIR}" resolved_embedded_item "${embedded_item}")
+    set(resolved 1)
+  endif()
+
+  # Provide a hook so that projects can override embedded item resolution
+  # by whatever logic they choose:
+  #
+  if(COMMAND gp_resolve_embedded_item_override)
+    gp_resolve_embedded_item_override(
+      "${context}" "${embedded_item}" "${exepath}" resolved_embedded_item resolved)
+  endif()
+
+  if(NOT resolved)
+    message(STATUS "
+warning: cannot resolve embedded item '${embedded_item}'
+  possible problems:
+    need more directories?
+    need to use InstallRequiredSystemLibraries?
+    run in install tree instead of build tree?
+
+    context='${context}'
+    embedded_item='${embedded_item}'
+    GP_RPATH_DIR='${GP_RPATH_DIR}'
+    exepath='${exepath}'
+    resolved_embedded_item_var='${resolved_embedded_item_var}'
+")
+  endif()
+
+  set(${resolved_embedded_item_var} "${resolved_embedded_item}" PARENT_SCOPE)
+endfunction()
 
 function(gp_resolved_file_type original_file file exepath dirs type_var)
   #message(STATUS "**")
@@ -430,7 +500,7 @@ function(gp_resolved_file_type original_file file exepath dirs type_var)
 
   set(resolved_file "${file}")
 
-  if("${file}" MATCHES "^@(executable|loader)_path")
+  if("${file}" MATCHES "^@(executable_|loader_|r)path")
     set(is_embedded 1)
   endif()
 
