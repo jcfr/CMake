@@ -71,6 +71,16 @@
 #  IS_FILE_EXECUTABLE(<file> <result_var>)
 # Return 1 in <result_var> if <file> is a binary executable, 0 otherwise.
 #
+# GP_IS_FILE_EXECUTABLE_EXCLUDE_REGEX can be set to a regular expression used
+# to give a hint to identify more quickly if a given file is an executable or not.
+# This is particularly useful on unix platform where it can avoid a lot of
+# time-consuming call to "file" external process. For packages bundling hundreds
+# of libraries, executables, resources and data, it largely speeds up the function
+# "get_bundle_all_executables".
+# On unix, a convenient command line allowing to collect recursively all file extensions
+# useful to generate a regular expression like "\\.(dylib|py|pyc|so)$" is:
+#   find . -type f -name '*.*' | sed 's@.*/.*\.@@' | sort | uniq | tr "\\n" "|"
+#
 #  GP_ITEM_DEFAULT_EMBEDDED_PATH(<item> <default_embedded_path_var>)
 # Return the path that others should refer to the item by when the item
 # is embedded inside a bundle.
@@ -182,6 +192,14 @@ function(is_file_executable file result_var)
   # via the get_prerequisites macro.
   #
   if(UNIX)
+
+    if(NOT "${GP_IS_FILE_EXECUTABLE_EXCLUDE_REGEX}" STREQUAL "")
+      if(${file_full} MATCHES "${GP_IS_FILE_EXECUTABLE_EXCLUDE_REGEX}")
+        set(${result_var} 0 PARENT_SCOPE)
+        return()
+      endif()
+    endif()
+
     if(NOT file_cmd)
       find_program(file_cmd "file")
       mark_as_advanced(file_cmd)
