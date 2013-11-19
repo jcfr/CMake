@@ -390,6 +390,10 @@ if(BUILD_TESTING)
     endif()
   endif()
 
+  add_test(Module.ListToString ${CMAKE_CMAKE_COMMAND}
+    -P "${CMake_SOURCE_DIR}/Tests/Module/ListToStringTest.cmake"
+    )
+
   if (run_pic_test)
     ADD_TEST_MACRO(PositionIndependentTargets PositionIndependentTargets)
   endif()
