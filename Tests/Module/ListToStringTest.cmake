@@ -10,8 +10,11 @@ function(list_to_string_test)
                           "expected_output:${expected_output}")
     endif()
   endfunction()
-  
+
   include(${CMAKE_ROOT}/Modules/ListToString.cmake)
+
+  set(some_list "")
+  list(REVERSE some_list)
 
   set(id 1)
   set(case${id}_input "")

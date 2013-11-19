@@ -58,6 +58,7 @@ protected:
   bool HandleRemoveDuplicatesCommand(std::vector<std::string> const& args);
   bool HandleSortCommand(std::vector<std::string> const& args);
   bool HandleReverseCommand(std::vector<std::string> const& args);
+  bool HandleToStringCommand(std::vector<std::string> const& args);
 
 
   bool GetList(std::vector<std::string>& list, const char* var);

@@ -67,6 +67,10 @@ bool cmListCommand
     {
     return this->HandleReverseCommand(args);
     }
+  if(subCommand == "TO_STRING")
+    {
+    return this->HandleToStringCommand(args);
+    }
 
   std::string e = "does not recognize sub-command "+subCommand;
   this->SetError(e.c_str());
@@ -449,6 +453,60 @@ bool cmListCommand
     }
 
   this->Makefile->AddDefinition(listName.c_str(), value.c_str());
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmListCommand
+::HandleToStringCommand(std::vector<std::string> const& args)
+{
+  for(int i = 0; i < args.size(); ++i)
+    {
+    std::cout << "args[" << i << "] => " << args.at(i) << std::endl;
+    }
+  assert(args.size() >= 4);
+  if(args.size() > 4)
+    {
+    this->SetError(
+      "sub-command TO_STRING only takes three argument.");
+    return false;
+    }
+
+  const std::string& listName = args[1];
+  const std::string& separator = args[2];
+  const std::string& variableName = args[3];
+  std::string outputValue;
+
+  // expand the variable
+  std::vector<std::string> varArgsExpanded;
+  if ( !this->GetList(varArgsExpanded, listName.c_str()) )
+    {
+    this->SetError("sub-command TO_STRING requires list to be present.");
+    return false;
+    }
+
+  size_t list_length = varArgsExpanded.size();
+
+  // if the list has 0 or 1 element, there is no need to loop over.
+  if ( list_length == 1 )
+    {
+    outputValue = varArgsExpanded.at(0);
+    }
+  else if ( list_length >= 2 )
+    {
+    for ( size_t index = 0; index < list_length; ++index )
+      {
+      std::string item_value = varArgsExpanded.at(index);
+      outputValue += item_value;
+      // append separator if current element is NOT the last one.
+      if ( index !=  list_length - 1)
+        {
+        outputValue += separator;
+        }
+      }
+    }
+
+  this->Makefile->AddDefinition(variableName.c_str(), outputValue.c_str());
   return true;
 }
 
