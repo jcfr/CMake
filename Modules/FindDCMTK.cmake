@@ -60,6 +60,10 @@
 #
 # Legend:
 #
+#   SYSTEM DCMTK .....: Means that DCMTK libraries are installed in a standard location.
+#
+#   LOCAL DCMTK ......: Means that DCMTK libraries are either built or installed in a user defined location. 
+#
 #   NA ...............: Means that no System or Local DCMTK is available
 #
 #   [ ] DCMTKConfig ..: Means that the version of DCMTK does NOT export a DCMTKConfig.cmake file.
