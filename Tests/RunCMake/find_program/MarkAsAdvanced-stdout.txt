@@ -1,0 +1,2 @@
+-- PROG1='[^']*/Tests/RunCMake/find_program/A/testA'
+-- PROG2='[^']*/Tests/RunCMake/find_program/A/testA'
