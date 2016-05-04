@@ -1016,7 +1016,7 @@ int cmCTest::ExecuteHandler(const char* shandler)
 }
 
 //----------------------------------------------------------------------
-int cmCTest::ProcessTests()
+int cmCTest::ProcessSteps()
 {
   int res = 0;
   bool notest = true;
@@ -2640,7 +2640,7 @@ int cmCTest::ExecuteTests()
       }
     else
       {
-      res = this->ProcessTests();
+      res = this->ProcessSteps();
       }
     this->Finalize();
     }
