@@ -136,16 +136,17 @@ Options
 ``-M <model>, --test-model <model>``
  Sets the model for a dashboard.
 
- This option tells ctest to act as a CDash client where the TestModel
- can be Experimental, Nightly, and Continuous.  Combining ``-M`` and ``-T``
- is similar to ``-D``.
+ This option tells ctest to act as a CDash client where the ``<model>``
+ can be ``Experimental``, ``Nightly``, and ``Continuous``.
+ Combining ``-M`` and ``-T`` is similar to ``-D``.
 
 ``-T <action>, --test-action <action>``
  Sets the dashboard action to perform.
 
  This option tells ctest to act as a CDash client and perform some
- action such as start, build, test etc.  Combining ``-M`` and ``-T`` is
- similar to ``-D``.
+ action such as ``start``, ``build``, ``test`` etc. See
+ `Dashboard Client Steps`_ for the full list of actions.
+ Combining ``-M`` and ``-T`` is similar to ``-D``.
 
 ``--track <track>``
  Specify the track to submit dashboard to
@@ -250,7 +251,7 @@ Options
  Specify a specific target to build.
 
  This option goes with the ``--build-and-test`` option, if left out the
- all target is built.
+ ``all`` target is built.
 
 ``--build-nocmake``
  Run the build without running cmake first.
@@ -269,7 +270,7 @@ Options
  Specify the directory for the executable.
 
 ``--build-generator``
- Specify the generator to use.
+ Specify the generator to use. See the :manual:`cmake-generators(7)` manual.
 
 ``--build-generator-platform``
  Specify the generator-specific platform.
