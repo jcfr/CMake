@@ -388,11 +388,13 @@ cmCTest::~cmCTest()
   this->SetOutputLogFileName(0);
 }
 
+//----------------------------------------------------------------------
 void cmCTest::SetParallelLevel(int level)
 {
   this->ParallelLevel = level < 1 ? 1 : level;
 }
 
+//----------------------------------------------------------------------
 void cmCTest::SetTestLoad(unsigned long load)
 {
   this->TestLoad = load;
@@ -2941,7 +2943,6 @@ void cmCTest::SetCTestConfiguration(const char *name, const char* value,
   this->CTestConfiguration[name] = value;
 }
 
-
 //----------------------------------------------------------------------
 std::string cmCTest::GetCurrentTag()
 {
@@ -3056,6 +3057,7 @@ bool cmCTest::SetCTestConfigurationFromCMakeVariable(cmMakefile* mf,
   return true;
 }
 
+//----------------------------------------------------------------------
 bool cmCTest::RunCommand(
   const char* command,
   std::string* stdOut,
@@ -3211,6 +3213,7 @@ static const char* cmCTestStringLogType[] =
     (stream) << std::endl << file << ":" << line << " "; \
     }
 
+//----------------------------------------------------------------------
 void cmCTest::InitStreams()
 {
   // By default we write output to the process output streams.
@@ -3218,6 +3221,7 @@ void cmCTest::InitStreams()
   this->StreamErr = &std::cerr;
 }
 
+//----------------------------------------------------------------------
 void cmCTest::Log(int logType, const char* file, int line, const char* msg,
                   bool suppress)
 {
