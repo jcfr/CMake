@@ -336,7 +336,12 @@ function(ExternalData_add_target target)
       "Neither ExternalData_URL_TEMPLATES nor ExternalData_OBJECT_STORES is set!")
   endif()
   if(NOT ExternalData_OBJECT_STORES)
-    set(ExternalData_OBJECT_STORES ${CMAKE_BINARY_DIR}/ExternalData/Objects)
+    # Use ExternalData_OBJECT_STORES from environment as default.
+    set(ExternalData_OBJECT_STORES_DEFAULT "${CMAKE_BINARY_DIR}/ExternalData/Objects")
+    if(DEFINED "ENV{ExternalData_OBJECT_STORES}")
+      file(TO_CMAKE_PATH "$ENV{ExternalData_OBJECT_STORES}" ExternalData_OBJECT_STORES_DEFAULT)
+    endif()
+    set(ExternalData_OBJECT_STORES "${ExternalData_OBJECT_STORES_DEFAULT}")
   endif()
   set(_ExternalData_CONFIG_CODE "")
 
