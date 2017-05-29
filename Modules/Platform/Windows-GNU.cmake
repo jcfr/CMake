@@ -147,46 +147,19 @@ macro(__windows_compiler_gnu_abi lang)
     # We need to use the MS Librarian tool (lib.exe).
     # Find the most recent version available.
 
-    # Query the VS Installer tool for locations of VS 2017 and above.
-    set(_vs_installer_paths "")
-    foreach(vs RANGE 15 15 -1) # change the first number to the largest supported version
-      cmake_host_system_information(RESULT _vs_dir QUERY VS_${vs}_DIR)
-      if(_vs_dir)
-        list(APPEND _vs_installer_paths "${_vs_dir}/VC/Auxiliary/Build")
-      endif()
-    endforeach(vs)
-
     if("${CMAKE_SIZEOF_VOID_P}" EQUAL 4)
-      find_program(CMAKE_GNUtoMS_VCVARS NAMES vcvars32.bat
-        DOC "Visual Studio vcvars32.bat"
-        PATHS
-        ${_vs_installer_paths}
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\14.0\\Setup\\VC;ProductDir]/bin"
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\12.0\\Setup\\VC;ProductDir]/bin"
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\11.0\\Setup\\VC;ProductDir]/bin"
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0\\Setup\\VC;ProductDir]/bin"
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0\\Setup\\VC;ProductDir]/bin"
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup\\VC;ProductDir]/bin"
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\7.1\\Setup\\VC;ProductDir]/bin"
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\6.0\\Setup\\Microsoft Visual C++;ProductDir]/bin"
-        )
       set(CMAKE_GNUtoMS_ARCH x86)
     elseif("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
-      find_program(CMAKE_GNUtoMS_VCVARS NAMES vcvars64.bat vcvarsamd64.bat
-        DOC "Visual Studio vcvarsamd64.bat"
-        PATHS
-        ${_vs_installer_paths}
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\14.0\\Setup\\VC;ProductDir]/bin/amd64"
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\12.0\\Setup\\VC;ProductDir]/bin/amd64"
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\11.0\\Setup\\VC;ProductDir]/bin/amd64"
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0\\Setup\\VC;ProductDir]/bin/amd64"
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0\\Setup\\VC;ProductDir]/bin/amd64"
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup\\VC;ProductDir]/bin/amd64"
-        )
       set(CMAKE_GNUtoMS_ARCH amd64)
     endif()
-    unset(_vs_installer_paths)
+
+    set(Vcvars_ANY_VERSION 1)
+    find_package(Vcvars)
+    unset(Vcvars_ANY_VERSION)
+    get_property(_helpstring CACHE "Vcvars_BATCH_FILE" PROPERTY HELPSTRING)
+    set(CMAKE_GNUtoMS_VCVARS ${Vcvars_BATCH_FILE} CACHE FILEPATH "${_helpstring}")
     set_property(CACHE CMAKE_GNUtoMS_VCVARS PROPERTY ADVANCED 1)
+
     if(CMAKE_GNUtoMS_VCVARS)
       # Create helper script to run lib.exe from MS environment.
       string(REPLACE "/" "\\" CMAKE_GNUtoMS_BAT "${CMAKE_GNUtoMS_VCVARS}")

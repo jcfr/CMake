@@ -215,6 +215,7 @@ All Modules
    /module/FindThreads
    /module/FindTIFF
    /module/FindUnixCommands
+   /module/FindVcvars
    /module/FindVTK
    /module/FindVulkan
    /module/FindWget
